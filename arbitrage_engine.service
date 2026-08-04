@@ -1,0 +1,43 @@
+[Unit]
+Description=Phase 7 Hard Capital Controls & Quantitative Crypto Arbitrage Multi-Process Daemon
+Documentation=file:///home/daksh/arbitrage/AWS_DEPLOYMENT_TOPOLOGY.md
+After=network.target network-online.target chronyd.service time-sync.target
+Wants=network-online.target time-sync.target
+
+[Service]
+Type=simple
+User=ec2-user
+Group=ec2-user
+WorkingDirectory=/home/daksh/arbitrage
+
+# Environment settings for maximum network socket performance & zero buffering
+Environment=PYTHONUNBUFFERED=1
+Environment=LC_ALL=C.UTF-8
+Environment=UVLOOP_ENABLED=1
+
+# Executable entry point
+ExecStart=/usr/bin/python3 /home/daksh/arbitrage/phase3_scanner.py
+
+# Resilient restart policies: Auto-restart on unhandled system crashes
+Restart=always
+RestartSec=3
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+# Standard logging outputs pointing to syslog / journald
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=arb-quant-engine
+
+# POSIX Shared Memory and Kernel Resource Limits
+LimitMEMLOCK=infinity
+LimitNOFILE=65536
+
+# Phase 7 Linux Kernel OOM Killer Protection & Memory Containment
+# Explicitly bounds RAM allocation and sets OOMScoreAdjust to shield main matrix process from forced kernel termination
+MemoryMax=4G
+MemoryHigh=3.5G
+OOMScoreAdjust=-1000
+
+[Install]
+WantedBy=multi-user.target

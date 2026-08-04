@@ -1,0 +1,22 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment and sensitive keys
+.env
+.env.*
+*.pem
+*.key
+
+# Core Dumps and Logs
+core_dump.json
+*.log
+live_production_opportunities.csv
+arbitrage_opportunities.csv
+chaos_trades.json
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store
