@@ -4,6 +4,7 @@ import time
 import asyncio
 import signal
 import multiprocessing
+import aiohttp
 from aiohttp import web
 
 from config import PAIRS_CONFIG, LOG_CSV_PATH, LOG_TO_CSV, TELEMETRY_INTERVAL_SEC, IPC_SHARED_MEMORY_NAME, MAX_QUOTE_AGE_DELTA_MS
@@ -528,7 +529,39 @@ async def start_background_arbitrage():
 
     asyncio.create_task(evaluation_loop(GLOBAL_ENGINE, interval_sec=0.01))
     asyncio.create_task(telemetry_loop(GLOBAL_ENGINE, GLOBAL_WATCHDOG, GLOBAL_WORKERS, telemetry_agent))
-    print("[✅ CORE ONLINE] Evaluation & Telemetry loops active!\n")
+    asyncio.create_task(keep_alive_ping_loop())
+    print("[✅ CORE ONLINE] Evaluation, Telemetry & Anti-Sleep Keep-Alive loops active!\n")
+
+async def keep_alive_ping_loop():
+    """
+    Render Free Tier Anti-Sleep Keep-Alive Cron.
+    Pings the /health endpoint every 10 minutes (600s) to keep the instance active 24/7.
+    """
+    # Render automatically sets RENDER_EXTERNAL_URL (e.g. https://hft-crypto-arbitrage.onrender.com)
+    external_url = os.environ.get("RENDER_EXTERNAL_URL") or os.environ.get("KEEP_ALIVE_URL")
+    if not external_url:
+        print("[ℹ️ KEEP-ALIVE] RENDER_EXTERNAL_URL not set yet. Local container mode active.")
+        return
+
+    health_url = external_url.rstrip("/") + "/health"
+    print(f"[⏰ KEEP-ALIVE ACTIVE] Automated Anti-Sleep Pinger armed for: {health_url} (every 10 min)")
+    
+    # Initial grace period before first ping
+    await asyncio.sleep(60)
+    
+    while True:
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(health_url, timeout=aiohttp.ClientTimeout(total=15)) as resp:
+                    if resp.status == 200:
+                        print(f"[💓 KEEP-ALIVE PING] Successfully pinged {health_url} (HTTP 200 OK) at {time.strftime('%X')}")
+                    else:
+                        print(f"[⚠️ KEEP-ALIVE PING] Pinged {health_url} returned HTTP {resp.status}")
+        except Exception as e:
+            print(f"[⚠️ KEEP-ALIVE PING ERROR] Could not reach {health_url}: {e}")
+        
+        # Render sleeps after 15 minutes of inactivity; we ping every 10 minutes (600s)
+        await asyncio.sleep(600)
 
 async def on_startup(app):
     await start_background_arbitrage()

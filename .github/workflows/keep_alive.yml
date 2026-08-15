@@ -1,0 +1,30 @@
+name: Render 24/7 Anti-Sleep Keep-Alive Cron
+
+on:
+  schedule:
+    # Run every 10 minutes (Render sleeps after 15 minutes of inactivity)
+    - cron: '*/10 * * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+
+jobs:
+  ping-render:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Keep-Alive Ping to Render Web Service
+        run: |
+          # Use secret RENDER_URL if configured, otherwise fallback to default Render service name
+          TARGET_URL="${{ secrets.RENDER_URL }}"
+          if [ -z "$TARGET_URL" ]; then
+            TARGET_URL="https://hft-crypto-arbitrage.onrender.com/health"
+          fi
+          
+          echo "Sending Keep-Alive HTTP GET request to: $TARGET_URL"
+          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -m 30 "$TARGET_URL" || true)
+          echo "$RESPONSE"
+          
+          HTTP_STATUS=$(echo "$RESPONSE" | tr -d '\r' | grep "HTTP_STATUS:" | cut -d':' -f2)
+          if [ "$HTTP_STATUS" = "200" ]; then
+            echo "✅ Render Web Service is AWAKE and HEALTHY (HTTP 200 OK)"
+          else
+            echo "ℹ️ Render response status: $HTTP_STATUS (Service is waking up or active)"
+          fi
