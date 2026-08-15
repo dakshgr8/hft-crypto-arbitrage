@@ -200,7 +200,19 @@ class ArbitrageEngine:
                 self.circuit_breaker.report_trade_execution_outcome(is_success=True, realized_pnl_delta=realized_trade_profit)
 
                 if self.logger:
-                    self.logger.log_opportunity(ex1, ask1, ex2, bid2, gross_spread, net_profit, eval_micros)
+                    self.logger.log_paper_trade(
+                        asset=symbol,
+                        buy_ex=ex1,
+                        buy_price=ask1,
+                        sell_ex=ex2,
+                        sell_price=bid2,
+                        quantity=dynamic_units,
+                        gross_spread_per_unit=gross_spread,
+                        net_profit_per_unit=net_profit,
+                        fee_buy_rate=fee_buy,
+                        fee_sell_rate=fee_sell,
+                        eval_micros=eval_micros
+                    )
 
         t_end = time.perf_counter_ns()
         eval_micros = (t_end - t_start) / 1000.0

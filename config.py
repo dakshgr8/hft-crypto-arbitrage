@@ -81,7 +81,7 @@ MIN_INVENTORY_RATIO = 0.10 # 10%
 DYNAMIC_TRADE_SIZE_RATIO = 0.25 # Utilize 25% of available exchange inventory per arb trade
 
 # Production Logging & POSIX Shared Memory settings
-LOG_CSV_PATH = os.path.join(os.path.dirname(__file__), "live_production_opportunities.csv")
+LOG_CSV_PATH = os.path.join(os.path.dirname(__file__), "paper_trading_ledger.csv")
 LOG_TO_CSV = True
 TELEMETRY_INTERVAL_SEC = 5
 IPC_SHARED_MEMORY_NAME = "arb_l2_shared_mem"
