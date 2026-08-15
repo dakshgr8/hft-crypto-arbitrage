@@ -13,3 +13,12 @@ services:
         value: 3.11.9
       - key: PORT
         value: 10000
+
+  - type: cron
+    name: render-keep-alive-cron
+    env: python
+    region: oregon
+    plan: free
+    schedule: "*/10 * * * *"
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -c "import urllib.request; urllib.request.urlopen('https://hft-crypto-arbitrage.onrender.com/health', timeout=15)"
