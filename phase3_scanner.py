@@ -154,7 +154,7 @@ async def telemetry_loop(engine, watchdog, worker_procs, telemetry_agent=None):
             print(f" Evaluations         : {stats['count']} lock-free matrix scans")
             print(f" Opportunities       : {stats['opp_count']} validated real-time arbitrage gaps")
             print(f" Cross-Ocean Skipped : {stats.get('cross_region_skipped', 0)} cross-region pairs skipped (Tokyo <-> Virginia ~150ms RTT)")
-            print(f" Ghost Spreads Block : {stats['ghost_rejected']} time-warped pseudo-deltas filtered (35ms strict age tolerance)")
+            print(f" Ghost Spreads Block : {stats['ghost_rejected']} time-warped pseudo-deltas filtered ({MAX_QUOTE_AGE_DELTA_MS:.0f}ms age tolerance)")
             print(f" Sequence Gaps Block : {stats['seq_rejected']} corrupted or out-of-order packets dropped")
             print(f" Torn Reads Prevented: {stats.get('torn_reads_blocked', 0)} mid-write shared memory conflicts resolved via Seqlock")
             print(f" Avg Matrix Latency  : {stats['avg_lat']:.2f} µs (microseconds) | Min: {stats['min_lat']:.2f} µs")

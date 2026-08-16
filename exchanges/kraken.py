@@ -9,7 +9,7 @@ async def kraken_ws_worker(pairs_dict, parse_json, dump_json, update_orderbook_c
 
     while True:
         try:
-            async with websockets.connect(url, ping_interval=20, ping_timeout=10) as ws:
+            async with websockets.connect(url, ping_interval=15, ping_timeout=10) as ws:
                 sub_msg = {
                     "event": "subscribe",
                     "pair": list(pairs_dict.values()),
@@ -28,7 +28,8 @@ async def kraken_ws_worker(pairs_dict, parse_json, dump_json, update_orderbook_c
                         if asset and 'b' in ticker and 'a' in ticker:
                             bid = float(ticker['b'][0])
                             ask = float(ticker['a'][0])
-                            update_orderbook_callback(asset, 'kraken', bid, ask, recv_ns)
+                            if bid > 0 and ask > 0:
+                                update_orderbook_callback(asset, 'kraken', bid, ask, recv_ns, time.time() * 1000.0)
         except asyncio.CancelledError:
             break
         except Exception as e:

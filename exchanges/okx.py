@@ -8,7 +8,7 @@ async def okx_ws_worker(pairs_dict, parse_json, dump_json, update_orderbook_call
 
     while True:
         try:
-            async with websockets.connect(url, ping_interval=20, ping_timeout=10) as ws:
+            async with websockets.connect(url, ping_interval=15, ping_timeout=10) as ws:
                 args = [{"channel": "tickers", "instId": v} for v in pairs_dict.values()]
                 sub_msg = {
                     "op": "subscribe",
@@ -27,7 +27,9 @@ async def okx_ws_worker(pairs_dict, parse_json, dump_json, update_orderbook_call
                         if asset and 'bidPx' in ticker and 'askPx' in ticker:
                             bid = float(ticker['bidPx'])
                             ask = float(ticker['askPx'])
-                            update_orderbook_callback(asset, 'okx', bid, ask, recv_ns)
+                            server_ts = ticker.get('ts')
+                            if bid > 0 and ask > 0:
+                                update_orderbook_callback(asset, 'okx', bid, ask, recv_ns, server_ts)
         except asyncio.CancelledError:
             break
         except Exception as e:
