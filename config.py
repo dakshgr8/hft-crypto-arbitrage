@@ -25,12 +25,66 @@ PAIRS_CONFIG = {
         'bybit': 'SOLUSDT',
         'okx': 'SOL-USDT',
         'gateio': 'SOL_USDT'
+    },
+    'XRP': {
+        'binance': 'xrpusdt',
+        'kraken': 'XRP/USDT',
+        'coinbase': 'XRP-USDT',
+        'bybit': 'XRPUSDT',
+        'okx': 'XRP-USDT',
+        'gateio': 'XRP_USDT'
+    },
+    'DOGE': {
+        'binance': 'dogeusdt',
+        'kraken': 'DOGE/USDT',
+        'coinbase': 'DOGE-USDT',
+        'bybit': 'DOGEUSDT',
+        'okx': 'DOGE-USDT',
+        'gateio': 'DOGE_USDT'
+    },
+    'AVAX': {
+        'binance': 'avaxusdt',
+        'kraken': 'AVAX/USDT',
+        'coinbase': 'AVAX-USDT',
+        'bybit': 'AVAXUSDT',
+        'okx': 'AVAX-USDT',
+        'gateio': 'AVAX_USDT'
+    },
+    'LINK': {
+        'binance': 'linkusdt',
+        'kraken': 'LINK/USDT',
+        'coinbase': 'LINK-USDT',
+        'bybit': 'LINKUSDT',
+        'okx': 'LINK-USDT',
+        'gateio': 'LINK_USDT'
+    },
+    'ADA': {
+        'binance': 'adausdt',
+        'kraken': 'ADA/USDT',
+        'coinbase': 'ADA-USDT',
+        'bybit': 'ADAUSDT',
+        'okx': 'ADA-USDT',
+        'gateio': 'ADA_USDT'
+    },
+    'BNB': {
+        'binance': 'bnbusdt',
+        'kraken': 'BNB/USDT',
+        'coinbase': 'BNB-USDT',
+        'bybit': 'BNBUSDT',
+        'okx': 'BNB-USDT',
+        'gateio': 'BNB_USDT'
+    },
+    'NEAR': {
+        'binance': 'nearusdt',
+        'kraken': 'NEAR/USDT',
+        'coinbase': 'NEAR-USDT',
+        'bybit': 'NEARUSDT',
+        'okx': 'NEAR-USDT',
+        'gateio': 'NEAR_USDT'
     }
 }
 
 # --- Phase 4 Regional Co-Location Clustering ---
-# Overcomes optical speed-of-light delay (~150ms between Tokyo and Virginia).
-# Deterministic sub-35ms HFT arbitrage only executes within the same physical geographic cluster.
 REGIONAL_CLUSTERS = {
     'ap-northeast-1': {
         'name': 'Tokyo (APAC IT Hub)',
@@ -45,7 +99,6 @@ REGIONAL_CLUSTERS = {
 }
 
 # --- Phase 4 Exchange Rate Limit & Token Bucket Weight Settings ---
-# Prevents HTTP 429 and HTTP 418 (IP Auto-Ban) during massive volatility spikes
 API_RATE_LIMITS = {
     'binance':  {'max_weight_per_min': 2400, 'order_weight': 2, 'cancel_weight': 1, 'snapshot_weight': 5},
     'bybit':    {'max_weight_per_min': 2000, 'order_weight': 2, 'cancel_weight': 1, 'snapshot_weight': 5},
@@ -54,9 +107,9 @@ API_RATE_LIMITS = {
     'coinbase': {'max_weight_per_min': 1200, 'order_weight': 2, 'cancel_weight': 1, 'snapshot_weight': 5},
     'kraken':   {'max_weight_per_min': 1200, 'order_weight': 2, 'cancel_weight': 1, 'snapshot_weight': 5}
 }
-RATE_LIMIT_SAFETY_BUFFER = 0.85 # Self-throttle when reaching 85% of allowed weight capacity
+RATE_LIMIT_SAFETY_BUFFER = 0.85
 
-# Taker & Maker Fee Rates per Exchange (Standard spot tier & VIP tiers)
+# Taker & Maker Fee Rates per Exchange
 FEE_RATES = {
     'binance': {'taker': 0.0010, 'maker': 0.0008, 'futures_taker': 0.0004},
     'kraken': {'taker': 0.0026, 'maker': 0.0016, 'futures_taker': 0.0005},
@@ -66,14 +119,16 @@ FEE_RATES = {
     'gateio': {'taker': 0.0020, 'maker': 0.0015, 'futures_taker': 0.0005}
 }
 
-# Minimum profit target threshold in USDT per unit trade
-MIN_NET_PROFIT_USDT = 0.50
+# Minimum profit target threshold in USDT per executed trade
+MIN_NET_PROFIT_USDT = float(os.environ.get("MIN_NET_PROFIT_USDT", 0.05)) # $0.05 min net profit on total trade
+MIN_NET_SPREAD_PCT = float(os.environ.get("MIN_NET_SPREAD_PCT", 0.0001)) # 0.01% min net margin after fees
 
-# --- Phase 3 & 4 Institutional Resilience & Safety Settings ---
-# Quote Timestamp Drift: Strict at 35ms to prevent HFT staleness within regional clusters
-MAX_QUOTE_AGE_DELTA_MS = 35.0
+# Quote Timestamp Drift:
+# In cloud shadow mode over public internet, exchange ticker broadcast intervals vary between 500ms-2500ms.
+# 2500ms avoids false-positive ghost spread rejections on public feeds while filtering stale quotes (>2.5s).
+MAX_QUOTE_AGE_DELTA_MS = float(os.environ.get("MAX_QUOTE_AGE_DELTA_MS", 2500.0))
 
-# Watchdog timeout: Disconnect if no message received within this threshold (in seconds)
+# Watchdog timeout
 WATCHDOG_IDLE_TIMEOUT_SEC = 5.0
 
 # Inventory Rebalancing & Execution Bounds
@@ -85,4 +140,3 @@ LOG_CSV_PATH = os.path.join(os.path.dirname(__file__), "paper_trading_ledger.csv
 LOG_TO_CSV = True
 TELEMETRY_INTERVAL_SEC = 5
 IPC_SHARED_MEMORY_NAME = "arb_l2_shared_mem"
-

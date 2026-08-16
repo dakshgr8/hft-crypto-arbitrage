@@ -4,9 +4,15 @@ import websockets
 
 async def bybit_ws_worker(pairs_dict, parse_json, dump_json, update_orderbook_callback):
     symbol_map = {v.upper(): k for k, v in pairs_dict.items()}
-    url = "wss://stream.bybit.com/v5/public/spot"
-
+    endpoints = [
+        "wss://stream.bybit.com/v5/public/spot",
+        "wss://stream.bytick.com/v5/public/spot",
+        "wss://stream-testnet.bybit.com/v5/public/spot"
+    ]
+    
+    ep_idx = 0
     while True:
+        url = endpoints[ep_idx % len(endpoints)]
         try:
             async with websockets.connect(url, ping_interval=20, ping_timeout=10) as ws:
                 args = [f"tickers.{v}" for v in pairs_dict.values()]
@@ -15,7 +21,7 @@ async def bybit_ws_worker(pairs_dict, parse_json, dump_json, update_orderbook_ca
                     "args": args
                 }
                 await ws.send(dump_json(sub_msg))
-                print(f"[WebSocket] Subscribed to Bybit Multi-Pairs ({list(pairs_dict.keys())})")
+                print(f"[WebSocket] Subscribed to Bybit Multi-Pairs ({list(pairs_dict.keys())}) via {url.split('/')[2]}")
 
                 async for message in ws:
                     recv_ns = time.perf_counter_ns()
@@ -27,9 +33,11 @@ async def bybit_ws_worker(pairs_dict, parse_json, dump_json, update_orderbook_ca
                         if asset and 'bid1Price' in ticker and 'ask1Price' in ticker:
                             bid = float(ticker['bid1Price'])
                             ask = float(ticker['ask1Price'])
-                            update_orderbook_callback(asset, 'bybit', bid, ask, recv_ns)
+                            if bid > 0 and ask > 0:
+                                update_orderbook_callback(asset, 'bybit', bid, ask, recv_ns)
         except asyncio.CancelledError:
             break
         except Exception as e:
-            print(f"[Bybit WS Error] {e}. Reconnecting in 3s...")
+            print(f"[Bybit WS Error on {url.split('/')[2]}] {e}. Trying fallback in 3s...")
+            ep_idx += 1
             await asyncio.sleep(3)

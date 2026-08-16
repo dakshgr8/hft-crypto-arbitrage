@@ -130,15 +130,29 @@ class ArbitrageEngine:
                 self.ghost_arbitrage_rejected += 1
                 continue # Reject time-warped ghost spread (> 35ms delta)
 
-            # Retrieve taker fee rates for both venues
-            fee_buy = FEE_RATES[ex1]['taker']
-            fee_sell = FEE_RATES[ex2]['taker']
+            # Calculate Net Profit per unit and percentage spread after taker fees
+            fee_buy = FEE_RATES.get(ex1, {}).get('taker', 0.0010)
+            fee_sell = FEE_RATES.get(ex2, {}).get('taker', 0.0010)
 
-            # Calculate Net Profit per unit after fees
-            net_profit = bid2 * (1.0 - fee_sell) - ask1 * (1.0 + fee_buy)
+            net_profit_per_unit = bid2 * (1.0 - fee_sell) - ask1 * (1.0 + fee_buy)
+            net_spread_pct = net_profit_per_unit / ask1
             gross_spread = bid2 - ask1
 
-            if net_profit >= MIN_NET_PROFIT_USDT:
+            if net_profit_per_unit > 0 and (net_spread_pct >= 0.0001 or net_profit_per_unit >= 0.01):
+                # Calculate optimal dynamic order size based on real available capital inventory
+                dynamic_units = self.inventory_mgr.get_dynamic_order_size(
+                    buy_ex=ex1, 
+                    sell_ex=ex2, 
+                    asset=symbol, 
+                    buy_price=ask1, 
+                    target_usdt=600.0, 
+                    max_ratio=0.25
+                )
+                
+                total_trade_profit = net_profit_per_unit * dynamic_units
+                if total_trade_profit < MIN_NET_PROFIT_USDT and net_spread_pct < 0.0002:
+                    continue
+
                 t_end = time.perf_counter_ns()
                 eval_micros = (t_end - t_start) / 1000.0
                 self.opportunity_count += 1
@@ -153,16 +167,6 @@ class ArbitrageEngine:
                 if not perm['can_execute']:
                     print(f" [🛡️ KILL-SWITCH SHIELD ACTIVE] Trade execution blocked: {perm['reason']}")
                     continue
-
-                # Calculate optimal dynamic order size based on real available capital inventory
-                dynamic_units = self.inventory_mgr.get_dynamic_order_size(
-                    buy_ex=ex1, 
-                    sell_ex=ex2, 
-                    asset=symbol, 
-                    buy_price=ask1, 
-                    target_usdt=600.0, 
-                    max_ratio=0.25
-                )
                 
                 # Phase 7: Audit Execution Latency Profiles (p50/p99/p99.9) for matching engine congestion
                 lat_audit1 = self.latency_profiler.audit_routing_feasibility(ex1, dynamic_units)
@@ -174,7 +178,7 @@ class ArbitrageEngine:
                 
                 print(f"\n[⚡ PHASE 7 VALIDATED ARBITRAGE] Asset: {symbol} (Quote Age Delta: {age_delta_ms:.1f}ms | Cluster: {self.exchange_cluster_map[ex1]})")
                 print(f"   Buy {ex1.upper():<8} @ ${ask1:.4f} -> Sell {ex2.upper():<8} @ ${bid2:.4f}")
-                print(f"   Gross Spread: ${gross_spread:.4f}/unit | Net Profit: ${net_profit:.4f}/unit | Sizing: {dynamic_units:.4f} units | Eval Time: {eval_micros:.2f} µs")
+                print(f"   Gross Spread: ${gross_spread:.4f}/unit | Net Profit: ${net_profit_per_unit:.4f}/unit | Sizing: {dynamic_units:.4f} units | Eval Time: {eval_micros:.2f} µs")
 
                 # Phase 7: Record in Trade Reconciliation Database using unbiased Global Composite Consensus ($P_{composite}$)
                 self.analytics_db.record_and_reconcile_trade(
@@ -196,7 +200,7 @@ class ArbitrageEngine:
                 self.inventory_mgr.balances[ex2][symbol] = max(0.0, self.inventory_mgr.balances[ex2].get(symbol, 0.0) - dynamic_units)
                 self.inventory_mgr.balances[ex2]['USDT'] += bid2 * dynamic_units
                 
-                realized_trade_profit = net_profit * dynamic_units
+                realized_trade_profit = net_profit_per_unit * dynamic_units
                 self.circuit_breaker.report_trade_execution_outcome(is_success=True, realized_pnl_delta=realized_trade_profit)
 
                 if self.logger:
@@ -208,7 +212,7 @@ class ArbitrageEngine:
                         sell_price=bid2,
                         quantity=dynamic_units,
                         gross_spread_per_unit=gross_spread,
-                        net_profit_per_unit=net_profit,
+                        net_profit_per_unit=net_profit_per_unit,
                         fee_buy_rate=fee_buy,
                         fee_sell_rate=fee_sell,
                         eval_micros=eval_micros
