@@ -20,13 +20,22 @@ class InventoryManager:
                 'USDT': initial_capital_per_ex,
                 'BTC': initial_crypto_per_ex,
                 'ETH': initial_crypto_per_ex * 15,
-                'SOL': initial_crypto_per_ex * 400
+                'SOL': initial_crypto_per_ex * 400,
+                'XRP': 2000.0,
+                'DOGE': 10000.0,
+                'AVAX': 100.0,
+                'LINK': 200.0,
+                'ADA': 3000.0,
+                'BNB': 10.0,
+                'NEAR': 500.0
             }
             # Maintain collateral balances for futures hedging accounts
             self.futures_collateral[f"{ex}_futures"] = {
                 'USDT_collateral': 1000.0,
                 'margin_ratio': 0.85 # Initial comfortable maintenance buffer
             }
+        
+        self.balances = self.inventory
             
         self.onchain_router = OnChainWithdrawalRouter()
         

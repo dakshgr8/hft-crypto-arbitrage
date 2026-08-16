@@ -3,9 +3,11 @@ from multiprocessing import shared_memory
 from typing import Dict, Tuple, List, Optional
 import time
 
+from config import PAIRS_CONFIG
+
 # Supported Exchanges and Pairs for Fixed Slot Mapping
 EXCHANGES = ['binance', 'kraken', 'coinbase', 'bybit', 'okx', 'gateio']
-PAIRS = ['BTC', 'ETH', 'SOL']
+PAIRS = list(PAIRS_CONFIG.keys())
 
 class L2QuoteStruct(ctypes.Structure):
     """
