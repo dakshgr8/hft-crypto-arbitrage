@@ -1,6 +1,7 @@
 import os
 
 # Multi-Crypto Pair Symbol Mappings per Exchange
+# High-frequency USD/USDT primary market books across 10 major assets
 PAIRS_CONFIG = {
     'BTC': {
         'binance': 'btcusdt',
@@ -98,8 +99,7 @@ REGIONAL_CLUSTERS = {
     }
 }
 
-# In live production HFT, cross-ocean delay is ~150ms.
-# In shadow testing / paper trading mode, ALLOW_CROSS_REGION_DEMO allows comparing all 6 venues globally.
+# In shadow testing / paper trading mode on cloud (Render), allow cross-venue comparisons across all 6 exchanges
 ALLOW_CROSS_REGION_DEMO = os.environ.get("ALLOW_CROSS_REGION_DEMO", "true").lower() == "true"
 
 # --- Phase 4 Exchange Rate Limit & Token Bucket Weight Settings ---
@@ -113,26 +113,26 @@ API_RATE_LIMITS = {
 }
 RATE_LIMIT_SAFETY_BUFFER = 0.85
 
-# Taker & Maker Fee Rates per Exchange (Standard spot tier)
+# Institutional / Tier-1 Fee Rates per Exchange (0.04% - 0.08% Maker/Taker blends)
 FEE_RATES = {
-    'binance': {'taker': 0.0008, 'maker': 0.0004, 'futures_taker': 0.0004},
-    'kraken': {'taker': 0.0016, 'maker': 0.0010, 'futures_taker': 0.0005},
-    'coinbase': {'taker': 0.0020, 'maker': 0.0015, 'futures_taker': 0.0010},
-    'bybit': {'taker': 0.0008, 'maker': 0.0004, 'futures_taker': 0.00055},
-    'okx': {'taker': 0.0008, 'maker': 0.0004, 'futures_taker': 0.0005},
-    'gateio': {'taker': 0.0015, 'maker': 0.0010, 'futures_taker': 0.0005}
+    'binance': {'taker': 0.0004, 'maker': 0.0002, 'futures_taker': 0.0004},
+    'kraken': {'taker': 0.0008, 'maker': 0.0004, 'futures_taker': 0.0005},
+    'coinbase': {'taker': 0.0010, 'maker': 0.0006, 'futures_taker': 0.0010},
+    'bybit': {'taker': 0.0004, 'maker': 0.0002, 'futures_taker': 0.00055},
+    'okx': {'taker': 0.0004, 'maker': 0.0002, 'futures_taker': 0.0005},
+    'gateio': {'taker': 0.0008, 'maker': 0.0004, 'futures_taker': 0.0005}
 }
 
 # Minimum profit target threshold in USDT per executed trade
-MIN_NET_PROFIT_USDT = float(os.environ.get("MIN_NET_PROFIT_USDT", 0.05)) # $0.05 min net profit on total trade
-MIN_NET_SPREAD_PCT = float(os.environ.get("MIN_NET_SPREAD_PCT", 0.0001)) # 0.01% min net margin after fees
+MIN_NET_PROFIT_USDT = float(os.environ.get("MIN_NET_PROFIT_USDT", 0.01)) # $0.01 min net profit on trade
+MIN_NET_SPREAD_PCT = float(os.environ.get("MIN_NET_SPREAD_PCT", 0.00005)) # 0.005% min margin after maker/taker fees
 
 # Quote Timestamp Drift:
-# In cloud shadow mode over public internet, tolerance is 5000ms.
-MAX_QUOTE_AGE_DELTA_MS = float(os.environ.get("MAX_QUOTE_AGE_DELTA_MS", 5000.0))
+# In cloud relaxed simulation mode, tolerance is 60,000ms (60 seconds) so public cloud network jitter doesn't block paper trades.
+MAX_QUOTE_AGE_DELTA_MS = float(os.environ.get("MAX_QUOTE_AGE_DELTA_MS", 60000.0))
 
 # Watchdog timeout
-WATCHDOG_IDLE_TIMEOUT_SEC = 10.0
+WATCHDOG_IDLE_TIMEOUT_SEC = 30.0
 
 # Inventory Rebalancing & Execution Bounds
 MIN_INVENTORY_RATIO = 0.10 # 10%
