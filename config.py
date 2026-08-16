@@ -1,84 +1,88 @@
 import os
 
+# =====================================================================
+# INSTITUTIONAL BARE-METAL HFT ARBITRAGE ENGINE CONFIGURATION
+# Optimized for AWS Tokyo (ap-northeast-1) Bare-Metal EC2 Co-Location
+# =====================================================================
+
 # Multi-Crypto Pair Symbol Mappings per Exchange
-# High-frequency USD/USDT primary market books across 10 major assets
 PAIRS_CONFIG = {
     'BTC': {
         'binance': 'btcusdt',
-        'kraken': 'XBT/USD',
-        'coinbase': 'BTC-USD',
+        'kraken': 'XBT/USDT',
+        'coinbase': 'BTC-USDT',
         'bybit': 'BTCUSDT',
         'okx': 'BTC-USDT',
         'gateio': 'BTC_USDT'
     },
     'ETH': {
         'binance': 'ethusdt',
-        'kraken': 'ETH/USD',
-        'coinbase': 'ETH-USD',
+        'kraken': 'ETH/USDT',
+        'coinbase': 'ETH-USDT',
         'bybit': 'ETHUSDT',
         'okx': 'ETH-USDT',
         'gateio': 'ETH_USDT'
     },
     'SOL': {
         'binance': 'solusdt',
-        'kraken': 'SOL/USD',
-        'coinbase': 'SOL-USD',
+        'kraken': 'SOL/USDT',
+        'coinbase': 'SOL-USDT',
         'bybit': 'SOLUSDT',
         'okx': 'SOL-USDT',
         'gateio': 'SOL_USDT'
     },
     'XRP': {
         'binance': 'xrpusdt',
-        'kraken': 'XRP/USD',
-        'coinbase': 'XRP-USD',
+        'kraken': 'XRP/USDT',
+        'coinbase': 'XRP-USDT',
         'bybit': 'XRPUSDT',
         'okx': 'XRP-USDT',
         'gateio': 'XRP_USDT'
     },
     'DOGE': {
         'binance': 'dogeusdt',
-        'kraken': 'DOGE/USD',
-        'coinbase': 'DOGE-USD',
+        'kraken': 'DOGE/USDT',
+        'coinbase': 'DOGE-USDT',
         'bybit': 'DOGEUSDT',
         'okx': 'DOGE-USDT',
         'gateio': 'DOGE_USDT'
     },
     'AVAX': {
         'binance': 'avaxusdt',
-        'kraken': 'AVAX/USD',
-        'coinbase': 'AVAX-USD',
+        'kraken': 'AVAX/USDT',
+        'coinbase': 'AVAX-USDT',
         'bybit': 'AVAXUSDT',
         'okx': 'AVAX-USDT',
         'gateio': 'AVAX_USDT'
     },
     'LINK': {
         'binance': 'linkusdt',
-        'kraken': 'LINK/USD',
-        'coinbase': 'LINK-USD',
+        'kraken': 'LINK/USDT',
+        'coinbase': 'LINK-USDT',
         'bybit': 'LINKUSDT',
         'okx': 'LINK-USDT',
         'gateio': 'LINK_USDT'
     },
     'ADA': {
         'binance': 'adausdt',
-        'kraken': 'ADA/USD',
-        'coinbase': 'ADA-USD',
+        'kraken': 'ADA/USDT',
+        'coinbase': 'ADA-USDT',
         'bybit': 'ADAUSDT',
         'okx': 'ADA-USDT',
         'gateio': 'ADA_USDT'
     },
     'BNB': {
         'binance': 'bnbusdt',
-        'kraken': 'BNB/USD',
-        'coinbase': 'BNB-USD',
+        'kraken': 'BNB/USDT',
+        'coinbase': 'BNB-USDT',
         'bybit': 'BNBUSDT',
         'okx': 'BNB-USDT',
         'gateio': 'BNB_USDT'
     },
     'NEAR': {
         'binance': 'nearusdt',
-        'kraken': 'NEAR/USD',
-        'coinbase': 'NEAR-USD',
+        'kraken': 'NEAR/USDT',
+        'coinbase': 'NEAR-USDT',
         'bybit': 'NEARUSDT',
         'okx': 'NEAR-USDT',
         'gateio': 'NEAR_USDT'
@@ -86,6 +90,7 @@ PAIRS_CONFIG = {
 }
 
 # --- Phase 4 Regional Co-Location Clustering ---
+# Strict optical speed-of-light boundary: only co-located venues within the same physical datacenter cluster are evaluated!
 REGIONAL_CLUSTERS = {
     'ap-northeast-1': {
         'name': 'Tokyo (APAC IT Hub)',
@@ -99,8 +104,9 @@ REGIONAL_CLUSTERS = {
     }
 }
 
-# In shadow testing / paper trading mode on cloud (Render), allow cross-venue comparisons across all 6 exchanges
-ALLOW_CROSS_REGION_DEMO = os.environ.get("ALLOW_CROSS_REGION_DEMO", "true").lower() == "true"
+# Cross-Region Cluster Execution Flag:
+# STRICT FALSE for bare-metal institutional production: eliminates ~150ms optical fiber lag and prevents toxic out-of-region fills!
+ALLOW_CROSS_REGION_DEMO = False
 
 # --- Phase 4 Exchange Rate Limit & Token Bucket Weight Settings ---
 API_RATE_LIMITS = {
@@ -113,26 +119,27 @@ API_RATE_LIMITS = {
 }
 RATE_LIMIT_SAFETY_BUFFER = 0.85
 
-# Institutional / Tier-1 Fee Rates per Exchange (0.04% - 0.08% Maker/Taker blends)
+# Standard Exchange Fee Rates
 FEE_RATES = {
-    'binance': {'taker': 0.0004, 'maker': 0.0002, 'futures_taker': 0.0004},
-    'kraken': {'taker': 0.0008, 'maker': 0.0004, 'futures_taker': 0.0005},
-    'coinbase': {'taker': 0.0010, 'maker': 0.0006, 'futures_taker': 0.0010},
-    'bybit': {'taker': 0.0004, 'maker': 0.0002, 'futures_taker': 0.00055},
-    'okx': {'taker': 0.0004, 'maker': 0.0002, 'futures_taker': 0.0005},
-    'gateio': {'taker': 0.0008, 'maker': 0.0004, 'futures_taker': 0.0005}
+    'binance': {'taker': 0.0010, 'maker': 0.0008, 'futures_taker': 0.0004},
+    'kraken': {'taker': 0.0026, 'maker': 0.0016, 'futures_taker': 0.0005},
+    'coinbase': {'taker': 0.0060, 'maker': 0.0040, 'futures_taker': 0.0010},
+    'bybit': {'taker': 0.0010, 'maker': 0.0010, 'futures_taker': 0.00055},
+    'okx': {'taker': 0.0010, 'maker': 0.0008, 'futures_taker': 0.0005},
+    'gateio': {'taker': 0.0020, 'maker': 0.0015, 'futures_taker': 0.0005}
 }
 
-# Minimum profit target threshold in USDT per executed trade
-MIN_NET_PROFIT_USDT = float(os.environ.get("MIN_NET_PROFIT_USDT", 0.01)) # $0.01 min net profit on trade
-MIN_NET_SPREAD_PCT = float(os.environ.get("MIN_NET_SPREAD_PCT", 0.00005)) # 0.005% min margin after maker/taker fees
+# Strict Minimum Net Profit Hurdle per Executed Trade
+MIN_NET_PROFIT_USDT = float(os.environ.get("MIN_NET_PROFIT_USDT", 0.50)) # $0.50 min net profit on trade
+MIN_NET_SPREAD_PCT = float(os.environ.get("MIN_NET_SPREAD_PCT", 0.0002)) # 0.02% min net margin after fees
 
-# Quote Timestamp Drift:
-# In cloud relaxed simulation mode, tolerance is 60,000ms (60 seconds) so public cloud network jitter doesn't block paper trades.
-MAX_QUOTE_AGE_DELTA_MS = float(os.environ.get("MAX_QUOTE_AGE_DELTA_MS", 60000.0))
+# Strict Quote Timestamp Drift:
+# In bare-metal co-located production (AWS Tokyo with PTP Chrony hardware time sync),
+# tolerance is strictly capped at 35.0ms to mathematically eliminate time-warped phantom spreads.
+MAX_QUOTE_AGE_DELTA_MS = float(os.environ.get("MAX_QUOTE_AGE_DELTA_MS", 35.0))
 
-# Watchdog timeout
-WATCHDOG_IDLE_TIMEOUT_SEC = 30.0
+# Watchdog idle timeout
+WATCHDOG_IDLE_TIMEOUT_SEC = 5.0
 
 # Inventory Rebalancing & Execution Bounds
 MIN_INVENTORY_RATIO = 0.10 # 10%

@@ -129,8 +129,8 @@ class ArbitrageEngine:
                 continue # Reject time-warped ghost spread (> 35ms delta)
 
             # Calculate Net Profit per unit and percentage spread after taker fees
-            fee_buy = FEE_RATES.get(ex1, {}).get('taker', 0.0004)
-            fee_sell = FEE_RATES.get(ex2, {}).get('taker', 0.0004)
+            fee_buy = FEE_RATES.get(ex1, {}).get('taker', 0.0010)
+            fee_sell = FEE_RATES.get(ex2, {}).get('taker', 0.0010)
 
             net_profit_per_unit = bid2 * (1.0 - fee_sell) - ask1 * (1.0 + fee_buy)
             net_spread_pct = net_profit_per_unit / ask1
