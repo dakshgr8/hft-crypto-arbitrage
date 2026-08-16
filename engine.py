@@ -1,6 +1,6 @@
 import time
 import itertools
-from config import FEE_RATES, MIN_NET_PROFIT_USDT, PAIRS_CONFIG, MAX_QUOTE_AGE_DELTA_MS, REGIONAL_CLUSTERS
+from config import FEE_RATES, MIN_NET_PROFIT_USDT, PAIRS_CONFIG, MAX_QUOTE_AGE_DELTA_MS, REGIONAL_CLUSTERS, ALLOW_CROSS_REGION_DEMO
 from watchdog import SequenceValidator, TimestampSyncValidator, Watchdog
 from inventory_manager import InventoryManager
 from ipc_manager import SharedMemoryIPCManager
@@ -105,10 +105,8 @@ class ArbitrageEngine:
 
         # Cross-exchange matrix evaluation for this symbol
         for ex1, ex2 in itertools.permutations(self.exchanges, 2):
-            # 1. Phase 4 Geographic Cluster Isolation
-            # Overcomes ~150ms optical speed-of-light delay between Tokyo and Virginia nodes.
-            # Deterministic latency arbitrage is strictly limited to same-cluster venues!
-            if self.exchange_cluster_map.get(ex1) != self.exchange_cluster_map.get(ex2):
+            # 1. Geographic Cluster Isolation (in live HFT); in shadow testing mode, ALLOW_CROSS_REGION_DEMO allows full cross-venue comparisons
+            if not ALLOW_CROSS_REGION_DEMO and (self.exchange_cluster_map.get(ex1) != self.exchange_cluster_map.get(ex2)):
                 self.cross_region_skipped += 1
                 continue
 

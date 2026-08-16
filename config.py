@@ -1,7 +1,6 @@
 import os
 
 # Multi-Crypto Pair Symbol Mappings per Exchange
-# Coinbase and Kraken use USD primary orderbooks (1:1 USD/USDT parity) for 100x higher tick frequency
 PAIRS_CONFIG = {
     'BTC': {
         'binance': 'btcusdt',
@@ -99,6 +98,10 @@ REGIONAL_CLUSTERS = {
     }
 }
 
+# In live production HFT, cross-ocean delay is ~150ms.
+# In shadow testing / paper trading mode, ALLOW_CROSS_REGION_DEMO allows comparing all 6 venues globally.
+ALLOW_CROSS_REGION_DEMO = os.environ.get("ALLOW_CROSS_REGION_DEMO", "true").lower() == "true"
+
 # --- Phase 4 Exchange Rate Limit & Token Bucket Weight Settings ---
 API_RATE_LIMITS = {
     'binance':  {'max_weight_per_min': 2400, 'order_weight': 2, 'cancel_weight': 1, 'snapshot_weight': 5},
@@ -110,14 +113,14 @@ API_RATE_LIMITS = {
 }
 RATE_LIMIT_SAFETY_BUFFER = 0.85
 
-# Taker & Maker Fee Rates per Exchange
+# Taker & Maker Fee Rates per Exchange (Standard spot tier)
 FEE_RATES = {
-    'binance': {'taker': 0.0010, 'maker': 0.0008, 'futures_taker': 0.0004},
-    'kraken': {'taker': 0.0026, 'maker': 0.0016, 'futures_taker': 0.0005},
-    'coinbase': {'taker': 0.0060, 'maker': 0.0040, 'futures_taker': 0.0010},
-    'bybit': {'taker': 0.0010, 'maker': 0.0010, 'futures_taker': 0.00055},
-    'okx': {'taker': 0.0010, 'maker': 0.0008, 'futures_taker': 0.0005},
-    'gateio': {'taker': 0.0020, 'maker': 0.0015, 'futures_taker': 0.0005}
+    'binance': {'taker': 0.0008, 'maker': 0.0004, 'futures_taker': 0.0004},
+    'kraken': {'taker': 0.0016, 'maker': 0.0010, 'futures_taker': 0.0005},
+    'coinbase': {'taker': 0.0020, 'maker': 0.0015, 'futures_taker': 0.0010},
+    'bybit': {'taker': 0.0008, 'maker': 0.0004, 'futures_taker': 0.00055},
+    'okx': {'taker': 0.0008, 'maker': 0.0004, 'futures_taker': 0.0005},
+    'gateio': {'taker': 0.0015, 'maker': 0.0010, 'futures_taker': 0.0005}
 }
 
 # Minimum profit target threshold in USDT per executed trade
@@ -125,7 +128,7 @@ MIN_NET_PROFIT_USDT = float(os.environ.get("MIN_NET_PROFIT_USDT", 0.05)) # $0.05
 MIN_NET_SPREAD_PCT = float(os.environ.get("MIN_NET_SPREAD_PCT", 0.0001)) # 0.01% min net margin after fees
 
 # Quote Timestamp Drift:
-# In cloud shadow mode over public internet, exchange ticker broadcast intervals vary between 500ms-5000ms.
+# In cloud shadow mode over public internet, tolerance is 5000ms.
 MAX_QUOTE_AGE_DELTA_MS = float(os.environ.get("MAX_QUOTE_AGE_DELTA_MS", 5000.0))
 
 # Watchdog timeout
