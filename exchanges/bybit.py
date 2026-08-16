@@ -34,7 +34,7 @@ async def bybit_ws_worker(pairs_dict, parse_json, dump_json, update_orderbook_ca
                             bid = float(ticker['bid1Price'])
                             ask = float(ticker['ask1Price'])
                             if bid > 0 and ask > 0:
-                                update_orderbook_callback(asset, 'bybit', bid, ask, recv_ns)
+                                update_orderbook_callback(asset, 'bybit', bid, ask, recv_ns, time.time() * 1000.0)
         except asyncio.CancelledError:
             break
         except Exception as e:

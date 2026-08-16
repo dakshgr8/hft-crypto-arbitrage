@@ -31,7 +31,7 @@ async def binance_ws_worker(pairs_dict, parse_json, update_orderbook_callback):
                         bid = float(data['b'])
                         ask = float(data['a'])
                         if bid > 0 and ask > 0:
-                            update_orderbook_callback(asset, 'binance', bid, ask, recv_ns)
+                            update_orderbook_callback(asset, 'binance', bid, ask, recv_ns, time.time() * 1000.0)
         except asyncio.CancelledError:
             break
         except Exception as e:

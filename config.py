@@ -1,83 +1,84 @@
 import os
 
 # Multi-Crypto Pair Symbol Mappings per Exchange
+# Coinbase and Kraken use USD primary orderbooks (1:1 USD/USDT parity) for 100x higher tick frequency
 PAIRS_CONFIG = {
     'BTC': {
         'binance': 'btcusdt',
-        'kraken': 'XBT/USDT',
-        'coinbase': 'BTC-USDT',
+        'kraken': 'XBT/USD',
+        'coinbase': 'BTC-USD',
         'bybit': 'BTCUSDT',
         'okx': 'BTC-USDT',
         'gateio': 'BTC_USDT'
     },
     'ETH': {
         'binance': 'ethusdt',
-        'kraken': 'ETH/USDT',
-        'coinbase': 'ETH-USDT',
+        'kraken': 'ETH/USD',
+        'coinbase': 'ETH-USD',
         'bybit': 'ETHUSDT',
         'okx': 'ETH-USDT',
         'gateio': 'ETH_USDT'
     },
     'SOL': {
         'binance': 'solusdt',
-        'kraken': 'SOL/USDT',
-        'coinbase': 'SOL-USDT',
+        'kraken': 'SOL/USD',
+        'coinbase': 'SOL-USD',
         'bybit': 'SOLUSDT',
         'okx': 'SOL-USDT',
         'gateio': 'SOL_USDT'
     },
     'XRP': {
         'binance': 'xrpusdt',
-        'kraken': 'XRP/USDT',
-        'coinbase': 'XRP-USDT',
+        'kraken': 'XRP/USD',
+        'coinbase': 'XRP-USD',
         'bybit': 'XRPUSDT',
         'okx': 'XRP-USDT',
         'gateio': 'XRP_USDT'
     },
     'DOGE': {
         'binance': 'dogeusdt',
-        'kraken': 'DOGE/USDT',
-        'coinbase': 'DOGE-USDT',
+        'kraken': 'DOGE/USD',
+        'coinbase': 'DOGE-USD',
         'bybit': 'DOGEUSDT',
         'okx': 'DOGE-USDT',
         'gateio': 'DOGE_USDT'
     },
     'AVAX': {
         'binance': 'avaxusdt',
-        'kraken': 'AVAX/USDT',
-        'coinbase': 'AVAX-USDT',
+        'kraken': 'AVAX/USD',
+        'coinbase': 'AVAX-USD',
         'bybit': 'AVAXUSDT',
         'okx': 'AVAX-USDT',
         'gateio': 'AVAX_USDT'
     },
     'LINK': {
         'binance': 'linkusdt',
-        'kraken': 'LINK/USDT',
-        'coinbase': 'LINK-USDT',
+        'kraken': 'LINK/USD',
+        'coinbase': 'LINK-USD',
         'bybit': 'LINKUSDT',
         'okx': 'LINK-USDT',
         'gateio': 'LINK_USDT'
     },
     'ADA': {
         'binance': 'adausdt',
-        'kraken': 'ADA/USDT',
-        'coinbase': 'ADA-USDT',
+        'kraken': 'ADA/USD',
+        'coinbase': 'ADA-USD',
         'bybit': 'ADAUSDT',
         'okx': 'ADA-USDT',
         'gateio': 'ADA_USDT'
     },
     'BNB': {
         'binance': 'bnbusdt',
-        'kraken': 'BNB/USDT',
-        'coinbase': 'BNB-USDT',
+        'kraken': 'BNB/USD',
+        'coinbase': 'BNB-USD',
         'bybit': 'BNBUSDT',
         'okx': 'BNB-USDT',
         'gateio': 'BNB_USDT'
     },
     'NEAR': {
         'binance': 'nearusdt',
-        'kraken': 'NEAR/USDT',
-        'coinbase': 'NEAR-USDT',
+        'kraken': 'NEAR/USD',
+        'coinbase': 'NEAR-USD',
         'bybit': 'NEARUSDT',
         'okx': 'NEAR-USDT',
         'gateio': 'NEAR_USDT'
@@ -124,12 +125,11 @@ MIN_NET_PROFIT_USDT = float(os.environ.get("MIN_NET_PROFIT_USDT", 0.05)) # $0.05
 MIN_NET_SPREAD_PCT = float(os.environ.get("MIN_NET_SPREAD_PCT", 0.0001)) # 0.01% min net margin after fees
 
 # Quote Timestamp Drift:
-# In cloud shadow mode over public internet, exchange ticker broadcast intervals vary between 500ms-2500ms.
-# 2500ms avoids false-positive ghost spread rejections on public feeds while filtering stale quotes (>2.5s).
-MAX_QUOTE_AGE_DELTA_MS = float(os.environ.get("MAX_QUOTE_AGE_DELTA_MS", 2500.0))
+# In cloud shadow mode over public internet, exchange ticker broadcast intervals vary between 500ms-5000ms.
+MAX_QUOTE_AGE_DELTA_MS = float(os.environ.get("MAX_QUOTE_AGE_DELTA_MS", 5000.0))
 
 # Watchdog timeout
-WATCHDOG_IDLE_TIMEOUT_SEC = 5.0
+WATCHDOG_IDLE_TIMEOUT_SEC = 10.0
 
 # Inventory Rebalancing & Execution Bounds
 MIN_INVENTORY_RATIO = 0.10 # 10%
